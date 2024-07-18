@@ -2,7 +2,7 @@ import { useState } from "react";
 import GameBoard from "./components/Gameboard/Gameboard";
 import Player from "./components/Player/Player";
 import LogSheet from "./components/LogSheet/LogSheet";
-import { WINNING_COMBS, INITIAL_GAMEBOARD } from "./assets/data";
+import { WINNING_COMBS, INITIAL_GAMEBOARD, PLAYERS } from "./assets/data";
 import GameOverModal from "./components/GameOverModal/GameOverModal";
 
 function globalActivePlayer(gameTurns) {
@@ -15,20 +15,8 @@ function globalActivePlayer(gameTurns) {
     return currentPlayer;
 }
 
-export default function App() {
-    const [gameTurns, setGameTurns] = useState([]);
-    const activePlayer = globalActivePlayer(gameTurns);
-    let winner = null;
-    let draw = gameTurns.length === 9 && !winner;
-
-    let gameBoard = [...INITIAL_GAMEBOARD.map((array) => [...array])];
-
-    for (const turn of gameTurns) {
-        const { square, player } = turn;
-        const { row, col } = square;
-
-        gameBoard[row][col] = player;
-    }
+function globalActiveWinner(gameBoard) {
+    let winner;
 
     for (const combination of WINNING_COMBS) {
         const firstChecker = gameBoard[combination[0].row][combination[0].col];
@@ -43,6 +31,30 @@ export default function App() {
             winner = firstChecker;
         }
     }
+
+    return winner;
+}
+
+function globalgameBoard(gameTurns) {
+    let gameBoard = [...INITIAL_GAMEBOARD.map((array) => [...array])];
+
+    for (const turn of gameTurns) {
+        const { square, player } = turn;
+        const { row, col } = square;
+
+        gameBoard[row][col] = player;
+    }
+
+    return gameBoard;
+}
+
+export default function App() {
+    const [gameTurns, setGameTurns] = useState([]);
+    const activePlayer = globalActivePlayer(gameTurns);
+    const gameBoard = globalgameBoard(gameTurns);
+    const winner = globalActiveWinner(gameBoard);
+
+    let draw = gameTurns.length === 9 && !winner;
 
     function handleSelectActivePlayer(rowIndex, colIndex) {
         setGameTurns((prevTurns) => {
@@ -67,12 +79,12 @@ export default function App() {
             <div className="game-container highlight-player">
                 <div className="players">
                     <Player
-                        name="Player 1"
+                        name={PLAYERS.X}
                         symbol="X"
                         isActive={activePlayer === "X"}
                     />
                     <Player
-                        name="Player 2"
+                        name={PLAYERS.O}
                         symbol="O"
                         isActive={activePlayer === "O"}
                     />
